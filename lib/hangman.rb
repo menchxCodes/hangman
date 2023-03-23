@@ -1,3 +1,6 @@
+module ValidateInput
+  # take player input and validate it
+end
 
 class KeyWord
   attr_accessor :key
@@ -23,15 +26,16 @@ class KeyWord
   # draw placeholder for answer
   def show
     puts "\n#{@display}   #{@wrong_guesses.join(' ')}"
-    puts "#{10-@wrong_guesses.length} guesses left."
-    puts "Please guess a character:\n" unless @wrong_guesses.length == 10
+    puts "#{10 - @wrong_guesses.length} guesses left."
+    puts "Please guess a character:\n" unless @wrong_guesses.length == 10 || @display.count('-').zero?
   end
 
-  def guess(char)
+  def guess
     # @type [String]
-    char = char.chomp
-    puts "you guessed #{char}"
-    compare_guess(char)
+    guess = get_input
+
+    puts "you guessed #{guess}"
+    compare_guess(guess)
     show
   end
 
@@ -46,6 +50,7 @@ class KeyWord
   end
 
   def game_over?
+    # if 10 guesses is reached the player loses
     if @wrong_guesses.length == 10
       puts "You are out of guesses. The words was \"#{@key}\""
       return true
@@ -58,17 +63,39 @@ class KeyWord
       false
     end
   end
+
+  def valid?(input)
+    if @wrong_guesses.include?(input)
+      false
+    elsif @display.include?(input)
+      false
+    elsif input.between?('a', 'z')
+      true
+    else
+      false
+    end
+  end
+
+  def get_input
+    input = gets
+    input = input.chomp.downcase.chr
+    until valid?(input)
+      if @wrong_guesses.include?(input)
+        puts "Duplicate input, you have already guessed \"#{input}\" incorrectly. Please guess another character:" 
+      elsif @display.include?(input)
+        puts "You have already guessed \"#{input}\" correctly. Please guess another character:"
+      else
+        puts "Invalid input \"#{input}\". Please enter a single charcter:"
+      end
+
+      input = gets
+      input = input.chomp.downcase.chr
+    end
+    input
+  end
 end
 
-
-# take player input and validate it
-# update placeholder with answer
-# if 10 guesses is reached the player loses
-
-# word = "recreational"
-key_word = KeyWord.new(5,12)
+key_word = KeyWord.new(5, 12)
 puts "#{key_word.key} #{key_word.key.length} #{key_word.key.class}"
 key_word.show
-until key_word.game_over?
-  key_word.guess(gets)
-end
+key_word.guess until key_word.game_over?
