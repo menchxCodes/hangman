@@ -1,7 +1,3 @@
-module ValidateInput
-  # take player input and validate it
-end
-
 class KeyWord
   attr_accessor :key
 
@@ -81,7 +77,7 @@ class KeyWord
     input = input.chomp.downcase.chr
     until valid?(input)
       if @wrong_guesses.include?(input)
-        puts "Duplicate input, you have already guessed \"#{input}\" incorrectly. Please guess another character:" 
+        puts "Duplicate input, you have already guessed \"#{input}\" incorrectly. Please guess another character:"
       elsif @display.include?(input)
         puts "You have already guessed \"#{input}\" correctly. Please guess another character:"
       else
