@@ -23,16 +23,16 @@ class KeyWord
     # @type [String]
     show
     guess = get_input
-    unless @saved
-      puts "you guessed #{guess}"
-      compare_guess(guess)
-    end
+    return if @saved
+
+    puts "you guessed #{guess}"
+    compare_guess(guess)
   end
 
   def game_over?
     # if 10 guesses is reached the player loses
     if @saved
-      puts "Game saved successfully."
+      puts 'Game saved successfully.'
       return true
     end
 
@@ -42,7 +42,9 @@ class KeyWord
     end
 
     if @display.count('-').zero?
-      puts 'You win!'
+      checkmark = "\u2713"
+      puts "\n#{@display} #{checkmark.encode('utf-8')}"
+      puts "You win!"
       true
     else
       false
@@ -66,7 +68,7 @@ class KeyWord
   def show
     puts "\n#{@display}   #{@wrong_guesses.join(' ')}"
     puts "#{10 - @wrong_guesses.length} guesses left."
-    puts "Please guess a character:\n" unless @wrong_guesses.length == 10 || @display.count('-').zero?
+    puts "Please guess a character, or type \"save\" to save the current game:\n" unless @wrong_guesses.length == 10 || @display.count('-').zero?
   end
 
   def compare_guess(guess)
@@ -118,7 +120,7 @@ class KeyWord
   def save_game
     @saved = true
     Dir.mkdir('save') unless Dir.exist?('save')
-    save_file = File.open("save/saved_game.txt","w")
+    save_file = File.open('save/saved_game.txt', 'w')
     save_file.puts to_json
     save_file.close
   end
@@ -137,7 +139,18 @@ class LoadGame < KeyWord
   end
 end
 # placeholder test
-key_word = KeyWord.new(5, 12)
-puts "#{key_word.key} #{key_word.key.length} #{key_word.key.class}"
-key_word.guess until key_word.game_over?
+
+puts "Press 1 to play a new game or Press 2 to load your last saved game:"
+game_mode = gets.chomp.to_i
+case game_mode
+when 1
+  key_word = KeyWord.new(5, 12)
+  key_word.guess until key_word.game_over?
+when 2
+  load_file = File.open("save/saved_game.txt","r")
+  key_word = LoadGame.from_json(load_file)
+  key_word.guess until key_word.game_over?
+else
+  puts "else"
+end
 
