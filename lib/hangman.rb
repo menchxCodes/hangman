@@ -1,4 +1,5 @@
 require 'json'
+require 'time'
 
 class KeyWord
   attr_accessor :key
@@ -10,27 +11,31 @@ class KeyWord
     @wrong_guesses = []
   end
 
-  def to_json
-    JSON.dump ({
-      :key => @key,
-      :display => @display,
-      :wrong_guesses => @wrong_guesses
-    })
+  def to_json(*_args)
+    JSON.dump({
+                key: @key,
+                display: @display,
+                wrong_guesses: @wrong_guesses
+              })
   end
-
-  
 
   def guess
     # @type [String]
     show
     guess = get_input
-
-    puts "you guessed #{guess}"
-    compare_guess(guess)
+    unless @saved
+      puts "you guessed #{guess}"
+      compare_guess(guess)
+    end
   end
 
   def game_over?
     # if 10 guesses is reached the player loses
+    if @saved
+      puts "Game saved successfully."
+      return true
+    end
+
     if @wrong_guesses.length == 10
       puts "You are out of guesses. The words was \"#{@key}\""
       return true
@@ -88,20 +93,34 @@ class KeyWord
 
   def get_input
     input = gets
-    input = input.chomp.downcase.chr
-    until valid?(input)
-      if @wrong_guesses.include?(input)
-        puts "Duplicate input, you have already guessed \"#{input}\" incorrectly. Please guess another character:"
-      elsif @display.include?(input)
-        puts "You have already guessed \"#{input}\" correctly. Please guess another character:"
-      else
-        puts "Invalid input \"#{input}\". Please enter a single charcter:"
-      end
+    input = input.chomp.downcase
+    if input == 'save'
+      save_game
 
-      input = gets
-      input = input.chomp.downcase.chr
+    else
+      input = input.chr
+      until valid?(input)
+        if @wrong_guesses.include?(input)
+          puts "Duplicate input, you have already guessed \"#{input}\" incorrectly. Please guess another character:"
+        elsif @display.include?(input)
+          puts "You have already guessed \"#{input}\" correctly. Please guess another character:"
+        else
+          puts "Invalid input \"#{input}\". Please enter a single charcter:"
+        end
+
+        input = gets
+        input = input.chomp.downcase.chr
+      end
+      input
     end
-    input
+  end
+
+  def save_game
+    @saved = true
+    Dir.mkdir('save') unless Dir.exist?('save')
+    save_file = File.open("save/saved_game.txt","w")
+    save_file.puts to_json
+    save_file.close
   end
 end
 
@@ -111,18 +130,14 @@ class LoadGame < KeyWord
     @display = data['display']
     @wrong_guesses = data['wrong_guesses']
   end
+
   def self.from_json(string)
     data = JSON.load string
-    self.new(data)
+    new(data)
   end
 end
+# placeholder test
 key_word = KeyWord.new(5, 12)
 puts "#{key_word.key} #{key_word.key.length} #{key_word.key.class}"
-# key_word.guess until key_word.game_over?
+key_word.guess until key_word.game_over?
 
-key_word.guess
-key_word.guess
-p key_word.to_json
-load_word = LoadGame.from_json(key_word.to_json)
-load_word.guess
-load_word.guess
