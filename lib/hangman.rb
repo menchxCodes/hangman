@@ -8,6 +8,32 @@ class KeyWord
     @wrong_guesses = []
   end
 
+  def guess
+    # @type [String]
+    show
+    guess = get_input
+
+    puts "you guessed #{guess}"
+    compare_guess(guess)
+  end
+
+  def game_over?
+    # if 10 guesses is reached the player loses
+    if @wrong_guesses.length == 10
+      puts "You are out of guesses. The words was \"#{@key}\""
+      return true
+    end
+
+    if @display.count('-').zero?
+      puts 'You win!'
+      true
+    else
+      false
+    end
+  end
+
+  private
+
   # establish 5-12 character words dictionary and select a random word
   def select_word(min_length, max_length)
     word_dictionary = File.open('word_dictionary.txt', 'r')
@@ -26,15 +52,6 @@ class KeyWord
     puts "Please guess a character:\n" unless @wrong_guesses.length == 10 || @display.count('-').zero?
   end
 
-  def guess
-    # @type [String]
-    guess = get_input
-
-    puts "you guessed #{guess}"
-    compare_guess(guess)
-    show
-  end
-
   def compare_guess(guess)
     @wrong_guesses.push(guess) if @key.index(guess).nil?
     index = 0
@@ -42,21 +59,6 @@ class KeyWord
       @display[index] = guess if char == guess
 
       index += 1
-    end
-  end
-
-  def game_over?
-    # if 10 guesses is reached the player loses
-    if @wrong_guesses.length == 10
-      puts "You are out of guesses. The words was \"#{@key}\""
-      return true
-    end
-
-    if @display.count('-').zero?
-      puts 'You win!'
-      true
-    else
-      false
     end
   end
 
@@ -93,5 +95,5 @@ end
 
 key_word = KeyWord.new(5, 12)
 puts "#{key_word.key} #{key_word.key.length} #{key_word.key.class}"
-key_word.show
+# key_word.show
 key_word.guess until key_word.game_over?
