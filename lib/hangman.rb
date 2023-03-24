@@ -1,3 +1,5 @@
+require 'json'
+
 class KeyWord
   attr_accessor :key
 
@@ -7,6 +9,16 @@ class KeyWord
     @display = ''.rjust(@key.length, '-')
     @wrong_guesses = []
   end
+
+  def to_json
+    JSON.dump ({
+      :key => @key,
+      :display => @display,
+      :wrong_guesses => @wrong_guesses
+    })
+  end
+
+  
 
   def guess
     # @type [String]
@@ -93,7 +105,24 @@ class KeyWord
   end
 end
 
+class LoadGame < KeyWord
+  def initialize(data)
+    @key = data['key']
+    @display = data['display']
+    @wrong_guesses = data['wrong_guesses']
+  end
+  def self.from_json(string)
+    data = JSON.load string
+    self.new(data)
+  end
+end
 key_word = KeyWord.new(5, 12)
 puts "#{key_word.key} #{key_word.key.length} #{key_word.key.class}"
-# key_word.show
-key_word.guess until key_word.game_over?
+# key_word.guess until key_word.game_over?
+
+key_word.guess
+key_word.guess
+p key_word.to_json
+load_word = LoadGame.from_json(key_word.to_json)
+load_word.guess
+load_word.guess
